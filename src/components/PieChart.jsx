@@ -2,13 +2,55 @@ import { ResponsivePie } from "@nivo/pie";
 import { tokens } from "../theme";
 import { useTheme } from "@mui/material";
 import { mockPieData as data } from "../data/mockData";
+import { useEffect, useState } from "react";
 
 const PieChart = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [apiData, setApiData] = useState([]);
+  const [sentimentCounts, setSentimentCounts] = useState({});
+
+  useEffect(() => {
+    fetch("/sentiment-counts")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((responseData) => {
+        setSentimentCounts(responseData);
+      })
+      .catch((error) => {
+        console.error("Error fetching sentiment counts:", error);
+      });
+  }, []);
+  
+
+  const data = [
+    {
+      id: "Negative",
+      label: "Negative",
+      value: sentimentCounts.negative || 0,
+      color: colors.negativeColor, // Define your own color for negative
+    },
+    {
+      id: "Positive",
+      label: "Positive",
+      value: sentimentCounts.positive || 0,
+      color: colors.positiveColor, // Define your own color for positive
+    },
+    {
+      id: "Neutral",
+      label: "Neutral",
+      value: sentimentCounts.neutral || 0,
+      color: colors.neutralColor, // Define your own color for neutral
+    },
+  ];
+
   return (
     <ResponsivePie
-      data={data}
+      data={apiData}
       theme={{
         axis: {
           domain: {
@@ -103,7 +145,10 @@ const PieChart = () => {
         },
       ]}
     />
+
   );
+}
+  
 };
 
 export default PieChart;

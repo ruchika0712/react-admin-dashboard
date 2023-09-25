@@ -7,6 +7,10 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import requests
 import re
+import json
+
+
+app = Flask(__name__)
 
 print("Checkpoint 1: Loaded all libraries.")
 
@@ -24,9 +28,6 @@ print("Checkpoint 2: Authentication done.")
 channel_ids = ['UCWwgaK7x0_FR1goeSRazfsQ']  # Samsung
 
 
-@app.route("/")
-def home():
-    return render_template("index.html")
 
 # Utility Functions
 
@@ -302,9 +303,35 @@ alldata["likeCounter"] = likeCounter
 
 print(alldata)
 
-# @app.route("/")
-# def home():
-#     return render_template("index.html")
+def calculate_sentiment_counts(comments_df):
+    positive_comments = len(comments_df[comments_df['Subject'] == 1])
+    neutral_comments = len(comments_df[comments_df['Subject'] == 2])
+    negative_comments = len(comments_df[comments_df['Subject'] == 0])
+
+    sentiment_counts = {
+        "positive": positive_comments,
+        "neutral": neutral_comments,
+        "negative": negative_comments
+    }
+
+    return sentiment_counts
+
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+# @app.route('/sentiment-counts')
+# def get_sentiment_counts():
+#     sentiment_counts = calculate_sentiment_counts(AllCommentsInfo)
+#     return json.dumps(sentiment_counts)
+
+
+# @app.route('/')
+# def get_time():
+#     # Returning an api for showing in  reactjs
+#     return alldata
+
 
 
 if __name__ == "__main__":
